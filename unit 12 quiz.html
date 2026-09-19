@@ -1,0 +1,688 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Unit 12 Review — Interactive Quiz</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;700;800&family=Nunito+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#F4F6FB;
+    --surface:#FFFFFF;
+    --ink:#1B2A4A;
+    --ink-soft:#5B6478;
+    --border:#E3E7F1;
+    --navy:#1B2A4A;
+    --coral:#E4572E;
+    --coral-soft:#FCE7E1;
+    --green:#2E8B57;
+    --green-soft:#E4F3EA;
+    --purple:#7B2CBF;
+    --purple-soft:#F0E4FA;
+    --gold:#C77E23;
+    --gold-soft:#FBEDD9;
+    --correct:#1E8E5A;
+    --correct-bg:#E6F6EE;
+    --wrong:#D64545;
+    --wrong-bg:#FCEAEA;
+    --radius:18px;
+    --shadow:0 10px 30px rgba(27,42,74,0.08);
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --bg:#11162A;
+      --surface:#1A2038;
+      --ink:#EEF1FA;
+      --ink-soft:#AEB6CC;
+      --border:#2B3352;
+      --coral-soft:#3A2620;
+      --green-soft:#1D3327;
+      --purple-soft:#2C2140;
+      --gold-soft:#3A2E16;
+      --correct-bg:#173324;
+      --wrong-bg:#3A1E1E;
+      --shadow:0 10px 30px rgba(0,0,0,0.35);
+    }
+  }
+  :root[data-theme="dark"]{
+    --bg:#11162A;
+    --surface:#1A2038;
+    --ink:#EEF1FA;
+    --ink-soft:#AEB6CC;
+    --border:#2B3352;
+    --coral-soft:#3A2620;
+    --green-soft:#1D3327;
+    --purple-soft:#2C2140;
+    --gold-soft:#3A2E16;
+    --correct-bg:#173324;
+    --wrong-bg:#3A1E1E;
+    --shadow:0 10px 30px rgba(0,0,0,0.35);
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background:var(--bg);
+    color:var(--ink);
+    font-family:'Nunito Sans', system-ui, sans-serif;
+    min-height:100vh;
+    -webkit-font-smoothing:antialiased;
+  }
+  h1,h2,h3,.headline{ font-family:'Baloo 2', system-ui, sans-serif; }
+  .wrap{
+    max-width:760px;
+    margin:0 auto;
+    padding:28px 18px 60px;
+  }
+  .top-row{
+    display:flex; align-items:center; justify-content:space-between; margin-bottom:22px;
+  }
+  .brand{
+    font-family:'Baloo 2', system-ui, sans-serif;
+    font-weight:800; font-size:1.05rem; color:var(--navy);
+    display:flex; align-items:center; gap:8px;
+  }
+  .brand-dot{ width:10px;height:10px;border-radius:50%; background:var(--coral); display:inline-block;}
+
+  /* ---------- MENU ---------- */
+  .hero{
+    text-align:center;
+    padding:10px 6px 6px;
+  }
+  .hero h1{
+    font-size:2rem;
+    line-height:1.15;
+    margin:0 0 8px;
+    color:var(--navy);
+  }
+  .hero p{
+    color:var(--ink-soft);
+    font-size:1.02rem;
+    max-width:480px;
+    margin:0 auto;
+  }
+  .name-box{
+    max-width:360px; margin:24px auto 0; text-align:left;
+  }
+  .name-box label{ font-size:.85rem; font-weight:700; color:var(--ink-soft); display:block; margin-bottom:6px; }
+  .name-box input{
+    width:100%; padding:12px 14px; border-radius:12px; border:1.5px solid var(--border);
+    font-family:inherit; font-size:1rem; background:var(--surface); color:var(--ink);
+  }
+  .name-box input:focus{ outline:2px solid var(--coral); outline-offset:1px; }
+  .progress-panel{
+    max-width:600px; margin:22px auto 0; background:var(--surface); border:1px solid var(--border);
+    border-radius:14px; padding:14px 18px; display:none;
+  }
+  .progress-panel.show{ display:block; }
+  .progress-panel h4{ margin:0 0 10px; font-size:.85rem; color:var(--ink-soft); font-weight:800; }
+  .progress-row{ display:flex; justify-content:space-between; align-items:center; padding:6px 0; font-size:.92rem; }
+  .progress-row .pname{ font-weight:700; }
+  .progress-row .pscore{ font-weight:800; }
+  .progress-row .pscore.pending{ color:var(--ink-soft); font-weight:600; }
+
+  /* ---------- PASSAGE ---------- */
+  .passage-card{
+    background:var(--surface); border:1px solid var(--border); border-radius:var(--radius);
+    padding:20px 22px; box-shadow:var(--shadow); margin-bottom:16px;
+  }
+  .passage-head{
+    display:flex; justify-content:space-between; align-items:center; cursor:pointer;
+  }
+  .passage-head h3{ margin:0; font-size:1.05rem; color:var(--navy); }
+  .toggle-chip{
+    font-size:.78rem; font-weight:700; color:#fff; background:var(--accent);
+    padding:5px 12px; border-radius:999px; border:none; cursor:pointer; font-family:inherit;
+  }
+  .passage-body{
+    margin-top:14px; font-size:.96rem; line-height:1.65; color:var(--ink);
+    max-height:260px; overflow-y:auto; padding-right:6px;
+  }
+  .passage-body p{ margin:0 0 12px; }
+  .passage-body.collapsed{ display:none; }
+  .menu-grid{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:16px;
+    margin-top:30px;
+  }
+  @media (max-width:560px){
+    .menu-grid{ grid-template-columns:1fr; }
+  }
+  .quiz-card{
+    background:var(--surface);
+    border:1px solid var(--border);
+    border-radius:var(--radius);
+    padding:22px 20px;
+    cursor:pointer;
+    text-align:left;
+    box-shadow:var(--shadow);
+    transition:transform .15s ease, box-shadow .15s ease;
+    position:relative;
+    overflow:hidden;
+  }
+  .quiz-card:hover{ transform:translateY(-3px); }
+  .quiz-card:active{ transform:translateY(-1px); }
+  .quiz-card::before{
+    content:"";
+    position:absolute; left:0; top:0; bottom:0; width:6px;
+    background:var(--accent);
+  }
+  .quiz-card .kicker{
+    font-size:.78rem; font-weight:700; color:var(--accent);
+    margin-bottom:6px;
+  }
+  .quiz-card h3{
+    margin:0 0 6px; font-size:1.18rem; color:var(--ink);
+  }
+  .quiz-card p{
+    margin:0; color:var(--ink-soft); font-size:.92rem; line-height:1.4;
+  }
+  .quiz-card .count{
+    display:inline-block; margin-top:12px; font-size:.8rem; font-weight:700;
+    color:var(--accent); background:var(--accent-soft);
+    padding:4px 10px; border-radius:999px;
+  }
+  .q-reading1{ --accent:var(--coral); --accent-soft:var(--coral-soft); }
+  .q-reading2{ --accent:var(--green); --accent-soft:var(--green-soft); }
+  .q-grammar{ --accent:var(--purple); --accent-soft:var(--purple-soft); }
+  .q-vocab{ --accent:var(--gold); --accent-soft:var(--gold-soft); }
+
+  /* ---------- QUIZ VIEW ---------- */
+  .screen{ display:none; }
+  .screen.active{ display:block; }
+
+  .quiz-header{
+    display:flex; align-items:center; gap:12px; margin-bottom:18px;
+  }
+  .back-btn{
+    border:1px solid var(--border); background:var(--surface); color:var(--ink);
+    border-radius:10px; padding:8px 12px; font-size:.85rem; cursor:pointer;
+    font-family:inherit; font-weight:700;
+  }
+  .back-btn:hover{ background:var(--bg); }
+  .quiz-title{ font-size:1.05rem; font-weight:800; color:var(--navy); flex:1; }
+
+  .progress-track{
+    height:8px; background:var(--border); border-radius:999px; overflow:hidden; margin-bottom:22px;
+  }
+  .progress-fill{
+    height:100%; background:var(--accent); width:0%; transition:width .3s ease;
+  }
+
+  .q-count{
+    font-size:.82rem; font-weight:700; color:var(--accent); margin-bottom:8px;
+  }
+  .q-card{
+    background:var(--surface); border:1px solid var(--border); border-radius:var(--radius);
+    padding:26px 22px; box-shadow:var(--shadow);
+  }
+  .q-prompt{
+    font-size:1.18rem; font-weight:700; line-height:1.4; margin:0 0 20px; color:var(--ink);
+  }
+  .options{ display:flex; flex-direction:column; gap:10px; }
+  .option{
+    display:flex; align-items:center; gap:12px;
+    border:1.5px solid var(--border); border-radius:12px;
+    padding:13px 15px; cursor:pointer; background:var(--bg);
+    font-size:1rem; font-weight:600; color:var(--ink);
+    transition:border-color .12s ease, background .12s ease;
+  }
+  .option:hover{ border-color:var(--accent); }
+  .option .letter{
+    width:26px; height:26px; min-width:26px; border-radius:50%;
+    background:var(--surface); border:1.5px solid var(--border);
+    display:flex; align-items:center; justify-content:center;
+    font-size:.82rem; font-weight:800; color:var(--ink-soft);
+  }
+  .option.correct{ background:var(--correct-bg); border-color:var(--correct); }
+  .option.correct .letter{ background:var(--correct); border-color:var(--correct); color:#fff; }
+  .option.wrong{ background:var(--wrong-bg); border-color:var(--wrong); }
+  .option.wrong .letter{ background:var(--wrong); border-color:var(--wrong); color:#fff; }
+  .option.disabled{ cursor:default; }
+  .option.dim{ opacity:.55; }
+
+  .feedback{
+    margin-top:16px; padding:14px 16px; border-radius:12px;
+    font-size:.94rem; line-height:1.5; display:none;
+  }
+  .feedback.show{ display:block; }
+  .feedback.correct{ background:var(--correct-bg); color:var(--correct); }
+  .feedback.wrong{ background:var(--wrong-bg); color:var(--wrong); }
+  .feedback b{ display:block; margin-bottom:3px; font-size:.98rem; }
+  .feedback .explain{ color:var(--ink); font-weight:500; }
+
+  .nav-row{ display:flex; justify-content:flex-end; margin-top:20px; }
+  .next-btn{
+    background:var(--accent); color:#fff; border:none; border-radius:12px;
+    padding:12px 22px; font-size:.98rem; font-weight:800; cursor:pointer;
+    font-family:inherit; display:none;
+  }
+  .next-btn.show{ display:inline-block; }
+  .next-btn:hover{ filter:brightness(1.05); }
+
+  /* ---------- RESULT ---------- */
+  .result-card{
+    background:var(--surface); border:1px solid var(--border); border-radius:var(--radius);
+    padding:36px 26px; text-align:center; box-shadow:var(--shadow);
+  }
+  .result-score{
+    font-family:'Baloo 2', system-ui, sans-serif;
+    font-size:3rem; font-weight:800; color:var(--accent); margin:6px 0;
+  }
+  .result-msg{ font-size:1.05rem; color:var(--ink-soft); margin-bottom:24px; }
+  .result-actions{ display:flex; gap:12px; justify-content:center; flex-wrap:wrap; }
+  .btn-secondary{
+    border:1.5px solid var(--border); background:var(--bg); color:var(--ink);
+    border-radius:12px; padding:12px 20px; font-weight:800; cursor:pointer; font-family:inherit;
+  }
+  .btn-primary{
+    border:none; background:var(--accent); color:#fff;
+    border-radius:12px; padding:12px 20px; font-weight:800; cursor:pointer; font-family:inherit;
+  }
+  footer{
+    text-align:center; color:var(--ink-soft); font-size:.8rem; margin-top:36px;
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="top-row">
+    <div class="brand"><span class="brand-dot"></span> Unit 12 Review</div>
+  </div>
+
+  <!-- MENU SCREEN -->
+  <div id="screen-menu" class="screen active">
+    <div class="hero">
+      <h1>Unit 12 Review Quiz</h1>
+      <p>going to &middot; want to &middot; would like to &middot; celebrations &amp; weather. Pick a quiz below — you'll see right away if each answer is correct.</p>
+      <div class="name-box">
+        <label for="student-name">Your name (so your teacher knows whose results these are)</label>
+        <input type="text" id="student-name" placeholder="e.g. Ahmed Al-Otaibi" oninput="saveName()">
+      </div>
+    </div>
+    <div class="progress-panel" id="progress-panel">
+      <h4>YOUR RESULTS SO FAR</h4>
+      <div id="progress-rows"></div>
+    </div>
+    <div class="menu-grid" id="menu-grid"></div>
+  </div>
+
+  <!-- QUIZ SCREEN -->
+  <div id="screen-quiz" class="screen">
+    <div class="quiz-header">
+      <button class="back-btn" onclick="goToMenu()">&larr; Menu</button>
+      <div class="quiz-title" id="quiz-title"></div>
+    </div>
+    <div class="progress-track"><div class="progress-fill" id="progress-fill"></div></div>
+    <div id="passage-holder"></div>
+    <div class="q-count" id="q-count"></div>
+    <div class="q-card">
+      <p class="q-prompt" id="q-prompt"></p>
+      <div class="options" id="options"></div>
+      <div class="feedback" id="feedback">
+        <b id="feedback-title"></b>
+        <span class="explain" id="feedback-explain"></span>
+      </div>
+      <div class="nav-row">
+        <button class="next-btn" id="next-btn" onclick="nextQuestion()">Next question &rarr;</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- RESULT SCREEN -->
+  <div id="screen-result" class="screen">
+    <div class="result-card">
+      <div style="font-size:.9rem;font-weight:700;color:var(--accent);" id="result-quiz-name"></div>
+      <div class="result-score" id="result-score"></div>
+      <div class="result-msg" id="result-msg"></div>
+      <div class="result-actions">
+        <button class="btn-secondary" onclick="startQuiz(currentQuizId)">Try again</button>
+        <button class="btn-primary" onclick="goToMenu()">Back to menu</button>
+      </div>
+      <button class="btn-secondary" id="copy-btn" style="margin-top:14px;width:100%;" onclick="copyResults()">📋 Copy my results to send to my teacher</button>
+    </div>
+  </div>
+
+  <footer>Unit 12 Review &middot; A2 Elementary &middot; going to / want to / would like to</footer>
+</div>
+
+<script>
+const QUIZZES = {
+  reading1: {
+    name: "Layla's Coming-of-Age Party",
+    kicker: "READING 1",
+    accentClass: "q-reading1",
+    desc: "5 comprehension questions + 5 true/false, based on the story.",
+    passage: [
+      "Layla is fifteen years old, and next month she is going to have a big coming-of-age party. She is very excited because all her family and friends are going to come. Her mother and father are going to help her plan everything.",
+      "First, Layla wants to decorate the house with pink and white flowers. She would like to put balloons on the front door too. Her older sister, Mona, is going to decorate the table with candles and a big cake. Layla doesn't want a small cake — she wants a huge chocolate cake with her name on it!",
+      "Layla's family are going to hire a band to play music at the party. Layla wants to dance all night with her friends. She would also like to hire an entertainer for the younger children, because her little cousins are going to come too.",
+      "For the party, Layla is going to wear a traditional costume. She doesn't want to wear a modern dress this time. Her grandmother made the costume by hand, and Layla loves it very much. Some of her friends are also going to dress up in traditional clothes.",
+      "The weather forecast says it is going to be warm and sunny on the day of the party, so the family are going to have the party in the garden. If it rains, they are going to move everything inside the house. Layla's father says, \"I hope it isn't going to rain. I want everyone to enjoy the garden.\"",
+      "Layla's best friend, Sara, would like to bring a special gift. She isn't going to tell Layla what it is — it's a surprise! Sara is also going to help Layla get ready before the party starts.",
+      "At six o'clock, the guests are going to arrive. Layla's mother is going to take a lot of photos to remember the special day. After the party, the family would like to watch the photos together and talk about the wonderful celebration.",
+      "Layla can't wait for her coming-of-age party. She thinks it is going to be the best day of her life!"
+    ],
+    questions: [
+      {p:"How old is Layla?", o:["Fourteen","Fifteen","Sixteen","Seventeen"], c:1, e:"The passage opens: “Layla is fifteen years old.”"},
+      {p:"Who is going to decorate the table?", o:["Mona, her sister","Layla","Layla's mother","Sara, her friend"], c:0, e:"“Her older sister, Mona, is going to decorate the table.”"},
+      {p:"What does Layla want instead of a small cake?", o:["A fruit cake","A cheese cake","A small cupcake","A huge chocolate cake"], c:3, e:"“She wants a huge chocolate cake with her name on it!”"},
+      {p:"Why does Layla want to hire an entertainer?", o:["For the younger children","For her grandmother","For the band","For her mother"], c:0, e:"“She would like to hire an entertainer for the younger children.”"},
+      {p:"What is Sara going to do before the party?", o:["Bring the band","Cook the food","Help Layla get ready","Decorate the house"], c:2, e:"“Sara is also going to help Layla get ready before the party starts.”"},
+      {p:"True or False: Layla is going to have her party next week.", o:["True","False"], c:1, e:"The passage says “next month”, not next week."},
+      {p:"True or False: Layla wants to wear a modern dress for the party.", o:["True","False"], c:1, e:"She's going to wear a traditional costume, not a modern dress."},
+      {p:"True or False: The weather forecast says it is going to be warm and sunny.", o:["True","False"], c:0, e:"“The weather forecast says it is going to be warm and sunny.”"},
+      {p:"True or False: Sara is going to tell Layla what her gift is before the party.", o:["True","False"], c:1, e:"“She isn't going to tell Layla what it is — it's a surprise!”"},
+      {p:"True or False: Layla's mother is going to take photos at the party.", o:["True","False"], c:0, e:"“Layla's mother is going to take a lot of photos.”"}
+    ]
+  },
+  reading2: {
+    name: "The Spring Festival in Our Town",
+    kicker: "READING 2",
+    accentClass: "q-reading2",
+    desc: "5 comprehension questions + 5 true/false, based on the story.",
+    passage: [
+      "Every spring, our town has a wonderful festival, and this year I am going to take part for the first time. The festival is going to start on Friday afternoon and finish on Sunday night.",
+      "On the first day, the town is going to decorate the main street with colourful flags and lights. My neighbours want to decorate their shops too, so the whole street is going to look amazing. There is going to be a big parade down the main street, and many people are going to dress up in traditional costumes.",
+      "I would like to take part in the parade with my classmates. We are going to wear yellow and green costumes because these are the colours of our town. My friend Omar doesn't want to walk in the parade — he prefers to watch it with his family instead.",
+      "At the festival, there are going to be arts and crafts workshops for children and adults. My little sister wants to make a paper lantern at one of the workshops. I would like to try the pottery workshop because I want to make a bowl for my mother.",
+      "In the evening, there is going to be live music on stage in the town square. Local singers and dancers are going to perform, and everyone is going to sing and dance together. There is also going to be a cooking competition, and my uncle wants to take part because he makes delicious local specialities.",
+      "The weather this weekend is going to be perfect for the festival. It isn't going to rain, and it is going to be warm and sunny every day. If it were cold or wet, the festival would move to the sports hall, but this year that isn't necessary.",
+      "Many visitors from other towns would like to come and see our festival because it is famous in our country. Some families are going to stay in the campsite near the river for the whole weekend.",
+      "I think this year's festival is going to be the best one ever, and I can't wait for it to start!"
+    ],
+    questions: [
+      {p:"When does the festival start?", o:["Monday morning","Sunday morning","Friday afternoon","Saturday evening"], c:2, e:"“The festival is going to start on Friday afternoon.”"},
+      {p:"What colours are the writer's parade costumes?", o:["Yellow and green","Blue and red","Pink and white","Black and gold"], c:0, e:"“We are going to wear yellow and green costumes.”"},
+      {p:"What does the writer want to make at the pottery workshop?", o:["A lantern","A plate","A cup","A bowl"], c:3, e:"“I want to make a bowl for my mother.”"},
+      {p:"Who wants to take part in the cooking competition?", o:["Omar","The writer's uncle","The writer's sister","The writer's mother"], c:1, e:"“My uncle wants to take part because he makes delicious local specialities.”"},
+      {p:"Where are some families going to stay for the weekend?", o:["In a hotel","At the sports hall","In the campsite","At their neighbour's house"], c:2, e:"“Some families are going to stay in the campsite near the river.”"},
+      {p:"True or False: The festival lasts for one day only.", o:["True","False"], c:1, e:"It runs from Friday afternoon to Sunday night — three days."},
+      {p:"True or False: Omar wants to walk in the parade with his classmates.", o:["True","False"], c:1, e:"“Omar doesn't want to walk in the parade — he prefers to watch it.”"},
+      {p:"True or False: There are arts and crafts workshops at the festival.", o:["True","False"], c:0, e:"“There are going to be arts and crafts workshops for children and adults.”"},
+      {p:"True or False: The weather this weekend is going to be cold and wet.", o:["True","False"], c:1, e:"“It is going to be warm and sunny every day.”"},
+      {p:"True or False: Visitors from other towns would like to see the festival.", o:["True","False"], c:0, e:"“Many visitors from other towns would like to come and see our festival.”"}
+    ]
+  },
+  grammar: {
+    name: "going to / want to / would like to",
+    kicker: "GRAMMAR",
+    accentClass: "q-grammar",
+    desc: "25 questions on future intentions and future wishes.",
+    questions: [
+      {p:"I ______ see a film this evening.", o:["is going to","are going to","am going to","going to"], c:2, e:"With 'I', use am going to."},
+      {p:"He ______ play tennis this weekend. He prefers football.", o:["isn't going to","doesn't going to","not going to","aren't going to"], c:0, e:"With he/she/it, the negative is isn't going to."},
+      {p:"______ you going to visit us next week?", o:["Do","Are","Does","Would"], c:1, e:"Questions with going to use Am/Is/Are, not Do/Does."},
+      {p:"I ______ book the tickets today.", o:["is going to","are going to","going","am going to"], c:3, e:"With 'I', use am going to."},
+      {p:"She ______ to have a haircut tomorrow.", o:["am going","are going","is going","go"], c:2, e:"With he/she/it, use is going to."},
+      {p:"I ______ get up early tomorrow. I want to sleep late.", o:["isn't going to","don't going to","not going to","am not going to"], c:3, e:"With 'I', the negative is am not going to."},
+      {p:"______ they going to arrive tonight?", o:["Does","Do","Are","Is"], c:2, e:"With they, use Are for going to questions."},
+      {p:"______ he going to do his homework this evening?", o:["Is","Does","Do","Are"], c:0, e:"With he, use Is for going to questions."},
+      {p:"I ______ travel this summer.", o:["wants to","want to","wanting to","am want to"], c:1, e:"With I/you/we/they, use want to (no -s)."},
+      {p:"He ______ to buy a new car.", o:["want","wants","wanting","is wants"], c:1, e:"With he/she/it, add -s: wants to."},
+      {p:"They ______ have a party. They prefer a quiet dinner.", o:["doesn't want to","not want to","don't want to","isn't want to"], c:2, e:"With they, the negative is don't want to."},
+      {p:"______ she want to stay out late tonight?", o:["Does","Do","Is","Are"], c:0, e:"With she, want to questions use Does."},
+      {p:"______ you want to go to the cinema?", o:["Does","Is","Do","Are"], c:2, e:"With you, want to questions use Do."},
+      {p:"I ______ to book a table for two, please.", o:["like","'d like","'ll like","liking"], c:1, e:"'d like to is the polite way to say what you want (= would like to)."},
+      {p:"We ______ to eat that. It looks strange.", o:["don't want","wouldn't want","not want","doesn't want"], c:0, e:"We usually prefer don't want to rather than wouldn't like to."},
+      {p:"______ you like to watch a film tonight?", o:["Do","Are","Does","Would"], c:3, e:"'d like to questions start with Would: Would you like...?"},
+      {p:"My parents ______ to meet you.", o:["likes","is liking","would like","wants"], c:2, e:"would like to is the same for all subjects, including plural ones."},
+      {p:"You ______ like to have a sandwich?", o:["do","would","are","is"], c:1, e:"The question form is Would you like...? — would goes with 'like to'."},
+      {p:"He ______ like to eat this. He wants something else.", o:["doesn't","don't","isn't","wouldn't"], c:3, e:"The negative of 'd like to is wouldn't like to."},
+      {p:"______ they like to come to the party?", o:["Do","Are","Would","Does"], c:2, e:"'d like to questions always use Would, for every subject."},
+      {p:"Do you want to come? Yes, I ______.", o:["want","do","would","am"], c:1, e:"Short answers to Do questions use do: Yes, I do."},
+      {p:"Does he want to play? No, he ______.", o:["isn't","don't","wouldn't","doesn't"], c:3, e:"Short answers to Does questions use doesn't: No, he doesn't."},
+      {p:"Would you like to join us? Yes, we ______.", o:["do","are","would","like"], c:2, e:"Short answers to Would questions use would: Yes, we would."},
+      {p:"Is she going to come? No, she ______.", o:["isn't","doesn't","wouldn't","don't"], c:0, e:"Short answers to Is questions use isn't: No, she isn't."},
+      {p:"Which sentence is correct?", o:["I'm going to go to the beach tomorrow.","I going to the beach tomorrow.","I'm go to the beach tomorrow.","I'm going to the beach tomorrow."], c:3, e:"We don't usually say 'going to go' — just use the present continuous: I'm going to the beach."}
+    ]
+  },
+  vocab: {
+    name: "Celebrations, Parties & Weather",
+    kicker: "VOCABULARY",
+    accentClass: "q-vocab",
+    desc: "25 questions on party and weather & seasons vocabulary.",
+    questions: [
+      {p:"When people wear special clothes for a festival, we say they ______.", o:["hire a band","decorate the table","dress up","take part in a parade"], c:2, e:"To dress up means to wear special clothes for an occasion."},
+      {p:"A party for finishing school or university is called a ______.", o:["leaving party","wedding party","birthday party","graduation party"], c:3, e:"A graduation party celebrates finishing school or university."},
+      {p:"If you pay someone to play music at your party, you ______.", o:["hire a band","make a cake","decorate the house","take part in a competition"], c:0, e:"To hire means to pay for the use of something or someone."},
+      {p:"We usually eat a birthday cake, but we first need to ______ it.", o:["hire","make","decorate","take part in"], c:1, e:"You make a cake before you can eat it."},
+      {p:"A party for someone who is leaving their job or moving away is a ______.", o:["coming-of-age party","leaving party","national holiday","religious holiday"], c:1, e:"A leaving party says goodbye to someone who is going away."},
+      {p:"Independence Day is an example of a ______.", o:["national holiday","religious holiday","leaving party","wedding party"], c:0, e:"A national holiday celebrates something important for the whole country."},
+      {p:"If the sky is grey and you can't see the sun, it's ______.", o:["sunny","cloudy","icy","windy"], c:1, e:"Cloudy describes a grey sky covered with clouds."},
+      {p:"When there is a lot of snow falling from the sky, we say ______.", o:["it's raining","it's foggy","it's snowing","it's hot"], c:2, e:"It's snowing describes snow falling."},
+      {p:"The season after summer and before winter is ______.", o:["spring","autumn","wet season","dry season"], c:1, e:"Autumn comes between summer and winter."},
+      {p:"If the temperature is very low and the streets are dangerous to walk on, it's ______.", o:["icy","warm","cool","hot"], c:0, e:"Icy describes very cold, slippery conditions."},
+      {p:"In some countries there isn't summer and winter — there is a ______ and a ______.", o:["spring / autumn","morning / evening","cold season / hot season","dry season / wet season"], c:3, e:"Some tropical countries have a dry season and a wet season."},
+      {p:"When you can't see very far because of thick, grey air, it's ______.", o:["windy","foggy","sunny","snowing"], c:1, e:"Foggy describes thick, low cloud near the ground."},
+      {p:"People at festivals often ______ in a competition to win a prize.", o:["hire","decorate","take part","dress up"], c:2, e:"To take part in a competition means to join in and compete."},
+      {p:"To make a house look festive with flowers and lights, we ______ it.", o:["decorate","take part in","hire","dress up in"], c:0, e:"To decorate means to make something look attractive."},
+      {p:"A person who entertains children at a party, for example a clown or magician, is called an ______.", o:["accommodation","entertainer","speciality","workshop"], c:1, e:"An entertainer performs to amuse guests."},
+      {p:"When the weather is not very hot and not very cold, we say it's ______.", o:["hot","icy","foggy","cool"], c:3, e:"Cool means mildly cold, between warm and cold."},
+      {p:"A place where people can put up a tent and sleep outdoors is a ______.", o:["campsite","accommodation","workshop","stage"], c:0, e:"A campsite is a place set up for camping in tents."},
+      {p:"Local food that a town or region is famous for is called ______.", o:["arts and crafts","accommodation","a parade","local specialities"], c:3, e:"Local specialities are foods a particular place is known for."},
+      {p:"The coldest season of the year is ______.", o:["summer","spring","autumn","winter"], c:3, e:"Winter is the coldest season."},
+      {p:"Musicians who perform in front of an audience are playing ______.", o:["live on stage","in a workshop","in a campsite","in accommodation"], c:0, e:"Live on stage describes a performance in front of an audience."},
+      {p:"Before a wedding, a family might plan a big ______.", o:["leaving party","wedding party","graduation party","coming-of-age party"], c:1, e:"A wedding party celebrates a marriage."},
+      {p:"When young people become adults, some cultures celebrate with a ______.", o:["national holiday","religious holiday","coming-of-age party","leaving party"], c:2, e:"A coming-of-age party marks becoming an adult."},
+      {p:"If rain is falling from the sky, we say ______.", o:["it's raining","it's snowing","it's foggy","it's windy"], c:0, e:"It's raining describes rain falling."},
+      {p:"A holiday connected with a religion, like Eid or Christmas, is a ______.", o:["national holiday","leaving party","graduation party","religious holiday"], c:3, e:"A religious holiday is connected to a religion."},
+      {p:"Places to stay overnight, like hotels or campsites, are called ______.", o:["local specialities","accommodation","arts and crafts","live on stage"], c:1, e:"Accommodation refers to places where people can stay."}
+    ]
+  }
+};
+
+let currentQuizId = null;
+let currentIndex = 0;
+let score = 0;
+let answered = false;
+let studentName = "";
+const results = {}; // quizId -> {score, total}
+let passageVisible = true;
+
+function saveName(){
+  studentName = document.getElementById('student-name').value.trim();
+}
+
+function renderProgressPanel(){
+  const panel = document.getElementById('progress-panel');
+  const rows = document.getElementById('progress-rows');
+  const done = Object.keys(results).length;
+  if (done === 0){ panel.classList.remove('show'); return; }
+  panel.classList.add('show');
+  rows.innerHTML = '';
+  Object.keys(QUIZZES).forEach(id => {
+    const q = QUIZZES[id];
+    const r = results[id];
+    const row = document.createElement('div');
+    row.className = 'progress-row';
+    row.innerHTML = `<span class="pname">${q.name}</span><span class="pscore ${r ? '' : 'pending'}">${r ? (r.score + ' / ' + r.total) : 'not started'}</span>`;
+    rows.appendChild(row);
+  });
+}
+
+function buildMenu(){
+  const grid = document.getElementById('menu-grid');
+  grid.innerHTML = '';
+  Object.keys(QUIZZES).forEach(id => {
+    const q = QUIZZES[id];
+    const card = document.createElement('div');
+    card.className = 'quiz-card ' + q.accentClass;
+    card.onclick = () => startQuiz(id);
+    card.innerHTML = `
+      <div class="kicker">${q.kicker}</div>
+      <h3>${q.name}</h3>
+      <p>${q.desc}</p>
+      <span class="count">${q.questions.length} questions</span>
+    `;
+    grid.appendChild(card);
+  });
+}
+
+function showScreen(id){
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+function goToMenu(){
+  renderProgressPanel();
+  showScreen('screen-menu');
+}
+
+function startQuiz(id){
+  currentQuizId = id;
+  currentIndex = 0;
+  score = 0;
+  passageVisible = true;
+  document.getElementById('quiz-title').textContent = QUIZZES[id].name;
+  renderPassage();
+  showScreen('screen-quiz');
+  renderQuestion();
+}
+
+function renderPassage(){
+  const quiz = QUIZZES[currentQuizId];
+  const holder = document.getElementById('passage-holder');
+  if (!quiz.passage){ holder.innerHTML = ''; return; }
+  const accent = getComputedStyle(document.querySelector('.'+quiz.accentClass)).getPropertyValue('--accent');
+  const bodyHtml = quiz.passage.map(p => `<p>${p}</p>`).join('');
+  holder.innerHTML = `
+    <div class="passage-card" style="--accent:${accent}">
+      <div class="passage-head" onclick="togglePassage()">
+        <h3>📖 ${quiz.name}</h3>
+        <button class="toggle-chip" id="passage-toggle">Hide text</button>
+      </div>
+      <div class="passage-body" id="passage-body">${bodyHtml}</div>
+    </div>
+  `;
+}
+
+function togglePassage(){
+  passageVisible = !passageVisible;
+  document.getElementById('passage-body').classList.toggle('collapsed', !passageVisible);
+  document.getElementById('passage-toggle').textContent = passageVisible ? 'Hide text' : 'Show text';
+}
+
+function renderQuestion(){
+  const quiz = QUIZZES[currentQuizId];
+  const total = quiz.questions.length;
+  const q = quiz.questions[currentIndex];
+  answered = false;
+
+  document.getElementById('progress-fill').style.width = ((currentIndex) / total * 100) + '%';
+  document.getElementById('progress-fill').style.background = getComputedStyle(document.querySelector('.'+quiz.accentClass)).getPropertyValue('--accent');
+  document.getElementById('q-count').textContent = `Question ${currentIndex + 1} of ${total}`;
+  document.getElementById('q-count').style.color = getComputedStyle(document.querySelector('.'+quiz.accentClass)).getPropertyValue('--accent');
+  document.getElementById('q-prompt').textContent = q.p;
+
+  const optionsDiv = document.getElementById('options');
+  optionsDiv.innerHTML = '';
+  const letters = ['A','B','C','D'];
+  q.o.forEach((text, idx) => {
+    const opt = document.createElement('div');
+    opt.className = 'option';
+    opt.innerHTML = `<span class="letter">${letters[idx]}</span><span>${text}</span>`;
+    opt.onclick = () => selectAnswer(idx, opt);
+    optionsDiv.appendChild(opt);
+  });
+
+  document.getElementById('feedback').classList.remove('show','correct','wrong');
+  document.getElementById('next-btn').classList.remove('show');
+
+  // set accent var scoped to card for this quiz
+  document.querySelector('.q-card').style.setProperty('--accent', getComputedStyle(document.querySelector('.'+quiz.accentClass)).getPropertyValue('--accent'));
+  document.getElementById('next-btn').style.background = getComputedStyle(document.querySelector('.'+quiz.accentClass)).getPropertyValue('--accent');
+}
+
+function selectAnswer(idx, el){
+  if (answered) return;
+  answered = true;
+  const quiz = QUIZZES[currentQuizId];
+  const q = quiz.questions[currentIndex];
+  const options = document.querySelectorAll('.option');
+
+  options.forEach((opt, i) => {
+    opt.classList.add('disabled');
+    if (i === q.c) opt.classList.add('correct');
+    if (i === idx && idx !== q.c) opt.classList.add('wrong');
+    if (i !== q.c && i !== idx) opt.classList.add('dim');
+  });
+
+  const isCorrect = idx === q.c;
+  if (isCorrect) score++;
+
+  const fb = document.getElementById('feedback');
+  fb.classList.add('show', isCorrect ? 'correct' : 'wrong');
+  document.getElementById('feedback-title').textContent = isCorrect ? 'Correct! 🎉' : 'Not quite.';
+  document.getElementById('feedback-explain').textContent = q.e;
+
+  const nextBtn = document.getElementById('next-btn');
+  nextBtn.textContent = (currentIndex === quiz.questions.length - 1) ? 'See results →' : 'Next question →';
+  nextBtn.classList.add('show');
+}
+
+function nextQuestion(){
+  const quiz = QUIZZES[currentQuizId];
+  currentIndex++;
+  if (currentIndex >= quiz.questions.length){
+    showResult();
+  } else {
+    renderQuestion();
+  }
+}
+
+function showResult(){
+  const quiz = QUIZZES[currentQuizId];
+  const total = quiz.questions.length;
+  const pct = Math.round((score/total) * 100);
+  results[currentQuizId] = {score: score, total: total};
+  document.getElementById('progress-fill').style.width = '100%';
+  document.getElementById('result-quiz-name').textContent = quiz.name;
+  document.getElementById('result-quiz-name').style.color = getComputedStyle(document.querySelector('.'+quiz.accentClass)).getPropertyValue('--accent');
+  document.getElementById('result-score').textContent = `${score} / ${total}`;
+  document.getElementById('result-score').style.color = getComputedStyle(document.querySelector('.'+quiz.accentClass)).getPropertyValue('--accent');
+
+  let msg;
+  if (pct === 100) msg = "Perfect score! You really know this unit.";
+  else if (pct >= 80) msg = "Great job! Just a little more practice.";
+  else if (pct >= 50) msg = "Good effort — review the tricky ones and try again.";
+  else msg = "Keep practising — try the quiz again to improve your score.";
+  document.getElementById('result-msg').textContent = msg;
+
+  showScreen('screen-result');
+  document.getElementById('copy-btn').textContent = '📋 Copy my results to send to my teacher';
+}
+
+function copyResults(){
+  const name = studentName || "(name not entered)";
+  const lines = [`${name} — Unit 12 Review Results`];
+  Object.keys(QUIZZES).forEach(id => {
+    const q = QUIZZES[id];
+    const r = results[id];
+    lines.push(`${q.name}: ${r ? (r.score + '/' + r.total) : 'not attempted'}`);
+  });
+  const text = lines.join('\n');
+  const btn = document.getElementById('copy-btn');
+  const done = () => { btn.textContent = '✅ Copied! Now paste it to your teacher.'; setTimeout(() => btn.textContent = '📋 Copy my results to send to my teacher', 2500); };
+  if (navigator.clipboard && navigator.clipboard.writeText){
+    navigator.clipboard.writeText(text).then(done).catch(() => fallbackCopy(text, done));
+  } else {
+    fallbackCopy(text, done);
+  }
+}
+
+function fallbackCopy(text, done){
+  const ta = document.createElement('textarea');
+  ta.value = text; ta.style.position = 'fixed'; ta.style.opacity = '0';
+  document.body.appendChild(ta); ta.select();
+  try { document.execCommand('copy'); done(); } catch(e){ alert(text); }
+  document.body.removeChild(ta);
+}
+
+buildMenu();
+</script>
+</body>
+</html>
